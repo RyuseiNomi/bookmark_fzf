@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+data=`cat ~/Library/Application\ Support/Google/Chrome/Default/Bookmarks`
+len=$(echo $data | jq .roots.bookmark_bar.children | jq length)
+
+declare -A datas
+names=()
+
+function bookmark_fzf() {
+    for i in `seq 0 $(expr ${len} - 1)`
+    do
+        # jsonから読み取ったbookmarkデータを１行ずつ読み取る
+        row_data=$(echo $data | jq .roots.bookmark_bar.children | jq .[$i])
+        type=$(echo $row_data | jq .type)
+        # bookmarkがフォルダの場合は更にその中身を探索する
+        if [ $type = "\"folder\"" ]; then
+            row_len=$(echo $row_data | jq .children | jq length)
+            for j in `seq 0 $(expr ${row_len} - 1)`
+            do
+                children_data=$(echo $row_data | jq .children[$j])
+                name=$(echo $children_data | jq .name)
+                url=$(echo $children_data | jq .url)
+                datas[$name]=$url
+                names+=("$name")
+            done
+        else
+            name=$(echo $row_data | jq .name)
+            url=$(echo $row_data | jq .url)
+            datas[$name]=$url
+            names+=("$name")
+        fi
+    done
+    
+    selected=$(printf "%s\n" "${names[@]}" | fzf)
+    selected_link=$(echo ${datas[$selected]} | sed 's/"//g')
+    open $selected_link
+}
+
+bookmark_fzf
