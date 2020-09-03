@@ -2,26 +2,30 @@
 
 data=`cat ~/Library/Application\ Support/Google/Chrome/Default/Bookmarks`
 len=$(echo $data | jq .roots.bookmark_bar.children | jq length)
+bookmark_list=$(echo $data | jq .roots.bookmark_bar.children)
 
 declare -A datas
 names=()
+ROW_COUNT=0
+FOLDER_COUNT=0
 
 function bookmark_fzf() {
-    for i in `seq 0 $(expr ${len} - 1)`
+    while [ $ROW_COUNT -lt $len ];
     do
-        # jsonから読み取ったbookmarkデータを１行ずつ読み取る
-        row_data=$(echo $data | jq .roots.bookmark_bar.children | jq .[$i])
+        row_data=$(echo $bookmark_list | jq .[$ROW_COUNT])
         type=$(echo $row_data | jq .type)
-        # bookmarkがフォルダの場合は更にその中身を探索する
+
+        # if the folder type is detected, further inspect itself.
         if [ $type = "\"folder\"" ]; then
             row_len=$(echo $row_data | jq .children | jq length)
-            for j in `seq 0 $(expr ${row_len} - 1)`
+            while [ $FOLDER_COUNT -lt $row_len ];
             do
-                children_data=$(echo $row_data | jq .children[$j])
+                children_data=$(echo $row_data | jq .children[$FOLDER_COUNT])
                 name=$(echo $children_data | jq .name)
                 url=$(echo $children_data | jq .url)
                 datas[$name]=$url
                 names+=("$name")
+                (( FOLDER_COUNT++ ))
             done
         else
             name=$(echo $row_data | jq .name)
@@ -29,6 +33,7 @@ function bookmark_fzf() {
             datas[$name]=$url
             names+=("$name")
         fi
+        (( ROW_COUNT++ ))
     done
     
     selected=$(printf "%s\n" "${names[@]}" | fzf)
