@@ -9,7 +9,12 @@ names=()
 ROW_COUNT=0
 FOLDER_COUNT=0
 
+# For progress spinner
+i=1
+spinner="/-\|"
+
 function bookmark_fzf() {
+    echo "Searching for bookmark"
     while [ $ROW_COUNT -lt $len ];
     do
         row_data=$(echo $bookmark_list | jq .[$ROW_COUNT])
@@ -26,12 +31,16 @@ function bookmark_fzf() {
                 datas[$name]=$url
                 names+=("$name")
                 (( FOLDER_COUNT++ ))
+                # For progress spinner
+                printf "\b${spinner:i++%${#spinner}:1}"
             done
         else
             name=$(echo $row_data | jq .name)
             url=$(echo $row_data | jq .url)
             datas[$name]=$url
             names+=("$name")
+            # For progress spinner
+            printf "\b${spinner:i++%${#spinner}:1}"
         fi
         (( ROW_COUNT++ ))
     done
