@@ -10,7 +10,7 @@ This command load Google Chrome bookmarks from your local machine and show as a 
 
 ## Requirements
 
-You need to install bash version 4.0 or later to exec the command.
+You need to install **bash version 4.0** or later to exec the command.
 
 ## Installation
 
