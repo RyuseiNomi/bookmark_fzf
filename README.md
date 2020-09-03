@@ -12,6 +12,14 @@ This command load Google Chrome bookmarks from your local machine and show as a 
 
 You need to install **bash version 4.0** or later to exec the command.
 
+If you get an error as below, please install bash with the latest version like `$brew install bash.
+
+```
+$ bookmark_fzf
+/usr/local/bin/bookmark_fzf: line 7: declare: -A: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+```
+
 ## Installation
 
 You can get the command from homebrew
